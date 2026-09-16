@@ -1,0 +1,88 @@
+<html>
+<head>
+  <style>
+    div {
+      background-color: gray;
+      width: 50vw;
+      padding: 8px;
+    }
+  </style>
+  <title>Iframe Detector POC</title>
+</head>
+<body>
+  <h1>Iframe Detector POC</h1>
+  <p>Click anywhere to detect if this page is inside an iframe. After clicking, an alert will indicate whether this page is inside an iframe or not.</p>
+  <p>This could work better than traditional iframe detection methods because it does not rely on JavaScript properties that can be easily spoofed or blocked by the browser.</p>
+  <p>For this demo, check console for the detection result.</p>
+  <br>
+  <p>To use this on your page, use the JavaScript in the code block below</p>
+  <p>You must have a favicon.ico in the root directory of your website.</p>
+  <br>
+  <div>
+    <pre><code>function waitForLeftClick() {
+  return new Promise((resolve) => {
+    function handleClick(event) {
+      if (event.button === 0) {
+        document.removeEventListener('mousedown', handleClick);
+        resolve(event);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+  });
+}
+(async () => {
+  const event = await waitForLeftClick();
+  const resources = performance.getEntriesByType('resource');
+  const faviconFetched = resources.some(res => res.name.endsWith('/favicon.ico'));
+
+  if (faviconFetched) {
+    isNotInIframe();
+  } else {
+    isInIframe();
+  }
+})();
+
+function isInIframe() {
+  // perform decision
+}
+
+function isNotInIframe() {
+  // perform decision
+}</code></pre>
+  </div>
+  <script>
+    function waitForLeftClick() {
+      return new Promise((resolve) => {
+        function handleClick(event) {
+          if (event.button === 0) {
+            document.removeEventListener('mousedown', handleClick);
+            resolve(event);
+          }
+        }
+        document.addEventListener('mousedown', handleClick);
+      });
+    }
+    (async () => {
+      const event = await waitForLeftClick();
+      const resources = performance.getEntriesByType('resource');
+      const faviconFetched = resources.some(res => res.name.endsWith('/favicon.ico'));
+
+      if (faviconFetched) {
+        isNotInIframe();
+      } else {
+        isInIframe();
+      }
+    })();
+
+    function isInIframe() {
+      // perform decision
+      console.log('This page is inside an iframe.');
+    }
+
+    function isNotInIframe() {
+      // perform decision
+      console.log('This page is not inside an iframe.');
+    }
+  </script>
+</body>
+</html>
