@@ -1,6 +1,6 @@
 <html>
 <head>
-  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="shortcut icon" href="broanders1.ico" />
   <style>
     div {
       background-color: gray;
@@ -14,77 +14,100 @@
   <h1>Iframe Detector POC</h1>
   <p>Click anywhere to detect if this page is inside an iframe. After clicking, an alert will indicate whether this page is inside an iframe or not.</p>
   <p>This could work better than traditional iframe detection methods because it does not rely on JavaScript properties that can be easily spoofed or blocked by the browser.</p>
+  <p>It utilizes the favicon request to determine if the page is inside an. iframe, so your page requires a favicon to be specified in the &lt;head&gt; section.</p>
   <p>For this demo, check console for the detection result.</p>
   <br>
   <p>To use this on your page, use the JavaScript in the code block below</p>
-  <p>You must mention favicon.ico in the &lt;head&gt; tag of your website.</p>
   <br>
   <div>
-    <pre><code>function waitForLeftClick() {
-  return new Promise((resolve) => {
-    function handleClick(event) {
-      if (event.button === 0) {
-        document.removeEventListener('mousedown', handleClick);
-        resolve(event);
+    <pre>
+<code>const faviconLink = document.querySelector("link[rel='shortcut icon'], link[rel='icon']");
+const faviconUrl = new URL(faviconLink.href, window.location.href).href;
+let faviconSeen = false;
+
+const isFaviconRequest = (resourceUrl) => {
+  const resolvedResourceUrl = new URL(resourceUrl, window.location.href).href;
+  return resolvedResourceUrl === faviconUrl;
+};
+
+if (PerformanceObserver) {
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (isFaviconRequest(entry.name)) {
+        faviconSeen = true;
+        observer.disconnect();
+        isNotInIframe();
+        return;
       }
     }
-    document.addEventListener('mousedown', handleClick);
   });
-}
-(async () => {
-  const event = await waitForLeftClick();
-  const resources = performance.getEntriesByType('resource');
-  const faviconName = document.querySelector("link[rel='shortcut icon']").href || document.querySelector("link[rel='icon']").href;
-  const faviconFetched = resources.some(res => res.name.endsWith('/favicon.ico'));
 
-  if (faviconFetched) {
-    isNotInIframe();
-  } else {
-    isInIframe();
-  }
-})();
+  observer.observe({ type: 'resource', buffered: true });
+}
+
+window.addEventListener('load', (event) => {
+  const delay = performance.now();
+  const wait = setTimeout(() => {
+    if (!faviconSeen) {
+      isInIframe();
+    }
+  }, delay);
+});
 
 function isInIframe() {
   // perform decision
+  console.log('This page is inside an iframe.');
 }
 
 function isNotInIframe() {
   // perform decision
-}</code></pre>
+  console.log('This page is not inside an iframe.');
+}</code>
+    </pre>
   </div>
   <script>
-    function waitForLeftClick() {
-      return new Promise((resolve) => {
-        function handleClick(event) {
-          if (event.button === 0) {
-            document.removeEventListener('mousedown', handleClick);
-            resolve(event);
-          }
-        }
-        document.addEventListener('mousedown', handleClick);
-      });
-    }
-    (async () => {
-      const event = await waitForLeftClick();
-      const resources = performance.getEntriesByType('resource');
-      const faviconFetched = resources.some(res => res.name.endsWith('/favicon.ico'));
+const faviconLink = document.querySelector("link[rel='shortcut icon'], link[rel='icon']");
+const faviconUrl = new URL(faviconLink.href, window.location.href).href;
+let faviconSeen = false;
 
-      if (faviconFetched) {
+const isFaviconRequest = (resourceUrl) => {
+  const resolvedResourceUrl = new URL(resourceUrl, window.location.href).href;
+  return resolvedResourceUrl === faviconUrl;
+};
+
+if (PerformanceObserver) {
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (isFaviconRequest(entry.name)) {
+        faviconSeen = true;
+        observer.disconnect();
         isNotInIframe();
-      } else {
-        isInIframe();
+        return;
       }
-    })();
-
-    function isInIframe() {
-      // perform decision
-      console.log('This page is inside an iframe.');
     }
+  });
 
-    function isNotInIframe() {
-      // perform decision
-      console.log('This page is not inside an iframe.');
+  observer.observe({ type: 'resource', buffered: true });
+}
+
+window.addEventListener('load', (event) => {
+  const delay = performance.now();
+  const wait = setTimeout(() => {
+    if (!faviconSeen) {
+      isInIframe();
     }
+  }, delay);
+});
+
+function isInIframe() {
+  // perform decision
+  console.log('This page is inside an iframe.');
+}
+
+function isNotInIframe() {
+  // perform decision
+  console.log('This page is not inside an iframe.');
+}
   </script>
 </body>
 </html>
