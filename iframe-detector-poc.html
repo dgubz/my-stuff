@@ -1,5 +1,6 @@
 <html>
 <head>
+  <link rel="shortcut icon" href="favicon.ico" />
   <style>
     div {
       background-color: gray;
@@ -16,7 +17,7 @@
   <p>For this demo, check console for the detection result.</p>
   <br>
   <p>To use this on your page, use the JavaScript in the code block below</p>
-  <p>You must have a favicon.ico in the root directory of your website.</p>
+  <p>You must mention favicon.ico in the &lt;head&gt; tag of your website.</p>
   <br>
   <div>
     <pre><code>function waitForLeftClick() {
@@ -33,6 +34,7 @@
 (async () => {
   const event = await waitForLeftClick();
   const resources = performance.getEntriesByType('resource');
+  const faviconName = document.querySelector("link[rel='shortcut icon']").href || document.querySelector("link[rel='icon']").href;
   const faviconFetched = resources.some(res => res.name.endsWith('/favicon.ico'));
 
   if (faviconFetched) {
