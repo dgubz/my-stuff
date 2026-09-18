@@ -1,0 +1,50 @@
+<html>
+<head>
+  <link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+  <p>Welcome, you are on my official website without a web proxy or iframe</p>
+  <script>
+const faviconLink = document.querySelector("link[rel='shortcut icon'], link[rel='icon']");
+const faviconUrl = new URL(faviconLink.href, window.location.href).href;
+let faviconSeen = false;
+
+const isFaviconRequest = (resourceUrl) => {
+  const resolvedResourceUrl = new URL(resourceUrl, window.location.href).href;
+  return resolvedResourceUrl === faviconUrl;
+};
+
+if (PerformanceObserver) {
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (isFaviconRequest(entry.name)) {
+        faviconSeen = true;
+        observer.disconnect();
+        isNotInIframe();
+        return;
+      }
+    }
+  });
+
+  observer.observe({ type: 'resource', buffered: true });
+}
+
+window.addEventListener('load', (event) => {
+  const delay = performance.now();
+  const wait = setTimeout(() => {
+    if (!faviconSeen) {
+      isInIframe();
+    }
+  }, delay);
+});
+
+function isInIframe() {
+  document.querySelector("p").textContent = "You are not on my official website";
+}
+
+function isNotInIframe() {
+  // nothing
+}
+  </script>
+</body>
+</html>
